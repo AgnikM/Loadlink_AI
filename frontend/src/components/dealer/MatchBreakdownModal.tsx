@@ -92,11 +92,13 @@ export default function MatchBreakdownModal({
     },
     {
       key: "reliability",
-      label: "Historical Carrier Reliability",
+      label: match.is_demo ? "Synthetic Carrier Reliability (Demo)" : "Historical Carrier Reliability",
       weight: "10%",
       score: match.factor_breakdown.reliability,
       icon: <Award className="w-4 h-4 text-[#3F7D58]" />,
-      desc: `${match.driver_reliability_score}% verified on-time delivery metric`,
+      desc: match.is_demo
+        ? `${match.driver_reliability_score}% synthetic demo metric (unverified)`
+        : `${match.driver_reliability_score}% verified on-time delivery metric`,
     },
     {
       key: "return_load_potential",
@@ -117,13 +119,19 @@ export default function MatchBreakdownModal({
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-[#E6DED5]">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#F0EAE1] text-[#5A3E2B] border border-[#E6DED5]">
                 {match.truck_registration_no}
               </span>
               <span className="text-xs text-[#6E6259]">
                 Driver: <strong className="text-[#29231F]">{match.driver_name}</strong>
               </span>
+              {match.is_demo && (
+                <span className="px-2 py-0.5 rounded bg-[#EFF6FF] border border-[#BFDBFE] text-[10px] text-[#1E40AF] font-bold inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                  DEMO DATA · Unverified
+                </span>
+              )}
             </div>
             <h2 className="text-base font-bold text-[#29231F] mt-1">
               Deterministic 7-Factor Score Breakdown

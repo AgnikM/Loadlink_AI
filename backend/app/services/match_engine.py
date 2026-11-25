@@ -35,14 +35,25 @@ class MatchEngine:
         # -------------------------------------------------------------
         
         # 1a. Verification status
-        if truck.verification_status != VerificationStatus.VERIFIED:
+        is_truck_demo = bool(getattr(truck, "is_demo", False))
+        is_load_demo = bool(getattr(load, "is_demo", False))
+
+        # Production loads must NEVER match unverified demo vehicles
+        if not is_load_demo and is_truck_demo:
             if rejection_collector is not None:
-                rejection_collector.append(f"{truck.registration_no}: Vehicle not yet verified")
+                rejection_collector.append(f"{truck.registration_no}: Demo vehicle cannot be dispatched on production load")
             return None
-        if not truck.driver or truck.driver.verification_status != VerificationStatus.VERIFIED:
-            if rejection_collector is not None:
-                rejection_collector.append(f"{truck.registration_no}: Driver credentials pending verification")
-            return None
+
+        # For production loads, strict verification is mandatory
+        if not (is_load_demo and is_truck_demo):
+            if truck.verification_status != VerificationStatus.VERIFIED:
+                if rejection_collector is not None:
+                    rejection_collector.append(f"{truck.registration_no}: Vehicle not yet verified")
+                return None
+            if not truck.driver or truck.driver.verification_status != VerificationStatus.VERIFIED:
+                if rejection_collector is not None:
+                    rejection_collector.append(f"{truck.registration_no}: Driver credentials pending verification")
+                return None
 
         # 1b. Capacity check: truck capacity must accommodate requested cargo weight
         if truck.capacity_tons < load.cargo_weight_tons:
@@ -187,7 +198,10 @@ class MatchEngine:
         reasons.append(f"{truck.capacity_tons}T capacity ({truck.truck_type.value})")
         if route_compat_score >= 80:
             reasons.append("high route corridor alignment")
-        reasons.append(f"{int(reliability_score)}% verified reliability")
+        if is_truck_demo:
+            reasons.append(f"{int(reliability_score)}% synthetic demo score (unverified)")
+        else:
+            reasons.append(f"{int(reliability_score)}% verified reliability")
         if is_coming_near_you:
             reasons.append("predictive in-transit arrival")
 
@@ -196,6 +210,7 @@ class MatchEngine:
         return {
             "truck_id": truck.id,
             "load_id": load.id,
+            "is_demo": is_truck_demo,
             "total_score": total_score,
             "factor_breakdown": {
                 "route_compatibility": round(route_compat_score, 1),

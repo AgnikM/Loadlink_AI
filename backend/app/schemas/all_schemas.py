@@ -223,6 +223,7 @@ class LoadOut(BaseModel):
     estimated_benchmark_price: Optional[float]
     cargo_notes: Optional[str]
     status: LoadStatus
+    is_demo: bool = False
     created_at: datetime
     matches_count: Optional[int] = 0
 
@@ -348,8 +349,10 @@ class TruckOut(BaseModel):
     registration_no: str
     truck_type: TruckType
     capacity_tons: float
+    legal_payload_tons: Optional[float] = None
     status: TruckStatus
     verification_status: VerificationStatus
+    is_demo: bool = False
     current_lat: Optional[float]
     current_lon: Optional[float]
     current_location_name: Optional[str]
@@ -379,14 +382,14 @@ class TruckOut(BaseModel):
         }
         self.vehicle_type = vt_map.get(self.truck_type, "Open")
         self.capacity_tonnes = self.capacity_tons
-        self.legal_payload_tonnes = self.capacity_tons
+        self.legal_payload_tonnes = self.legal_payload_tons or self.capacity_tons
         self.latitude = self.current_lat if self.current_lat is not None else 22.5448
         self.longitude = self.current_lon if self.current_lon is not None else 88.3186
         self.available = (self.status in [TruckStatus.ONLINE_AVAILABLE, TruckStatus.AVAILABLE])
-        self.verified = (self.verification_status == VerificationStatus.VERIFIED)
-        self.documents_valid = (self.verification_status == VerificationStatus.VERIFIED)
+        self.verified = (self.verification_status == VerificationStatus.VERIFIED and not self.is_demo)
+        self.documents_valid = (self.verification_status == VerificationStatus.VERIFIED and not self.is_demo)
         self.reliability_score = self.driver_reliability_score or 85.0
-        self.quoted_freight_inr = 19000.0
+        self.quoted_freight_inr = self.quoted_freight_inr or 19000.0
         return self
 
     model_config = ConfigDict(from_attributes=True)
@@ -444,6 +447,7 @@ class MatchOut(BaseModel):
     truck_current_lat: Optional[float]
     truck_current_lon: Optional[float]
     truck_location_name: Optional[str]
+    is_demo: Optional[bool] = False
 
 # --- Booking Schemas ---
 class BookingCreate(BaseModel):
@@ -614,6 +618,7 @@ class AIMatchResult(BaseModel):
     ai_score: float
     neural_network_score: Optional[float] = None
     ranking_method: str = "Deterministic 7-Factor Corridor Optimization Engine"
+    is_demo: Optional[bool] = False
 
 class AIMatchingResponse(BaseModel):
     load_id: str

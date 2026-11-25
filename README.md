@@ -212,13 +212,60 @@ pytest backend/tests/test_master_prompt_2.py -v
 pytest backend/tests/test_master_prompt_2_1_security.py -v
 pytest backend/tests/test_master_prompt_3.py -v
 
+# Fleet dataset integration tests (5 tests)
+pytest backend/tests/test_fleet_dataset_integration.py -v
+
 # Run multi-worker load test (100, 500, 1000 simulated users)
 python scripts/load_test_bench.py
 ```
 
 ---
 
-## 8. Backup & Recovery Operations
+## 8. Demo Fleet Dataset Integration
+
+LoadLink AI includes a synthetic fleet dataset (`datasets/LoadLink_Demo_Fleet_Dataset.xlsx`) designed for realistic corridor demonstration, load matching stress-testing, and UI evaluation without corrupting production workflows.
+
+### Dataset File Location
+`datasets/LoadLink_Demo_Fleet_Dataset.xlsx`
+
+### Import & Management Commands
+
+```bash
+# 1. Preview changes without modifying the database (dry run)
+python scripts/import_fleet_dataset.py --dry-run
+
+# 2. Execute live import (idempotent, safe to run multiple times)
+python scripts/import_fleet_dataset.py
+
+# 3. Verify security isolation & constraints
+python scripts/verify_import.py
+
+# 4. Remove all synthetic demo records and restore pristine state
+python scripts/import_fleet_dataset.py --reset-demo
+```
+
+### Imported Record Counts
+
+| Category | Sheet Name | Imported Count | Notes |
+| :--- | :--- | :--- | :--- |
+| **Trucks** | `truck_master` | **60** | 16T to 40T multi-axle, container, and open-body vehicles |
+| **Drivers** | `drivers` | **60** | Synthetic driver profiles with phone numbers & DL IDs |
+| **Loads** | `loads` | **40** | Industrial cargo (TMT bars, billets, sponge iron, cement) |
+| **Trips / Bookings** | `trips` | **50** | Synthetic bookings across Bengal corridor |
+| **Shipments** | `trips` | **26** | Unique load constraint preserved; historical corridor dispatches |
+| **Location History**| `location_history`| **150** | Corridor GPS breadcrumbs along NH19 |
+
+### Operational Isolation & Security Guardrails
+
+1. **Strict Production Isolation (`is_demo = True`)**: Every imported record is permanently tagged `is_demo = True` across users, organizations, dealers, transporters, drivers, trucks, loads, bookings, shipments, and location breadcrumbs.
+2. **Mandatory Unverified Status**: Demo trucks and drivers are strictly forbidden from having verified credentials (`verification_status = PENDING`, `verified = False`, `documents_valid = False`).
+3. **Dispatch Gating**: The 7-factor matching engine strictly rejects any demo truck evaluated against a real production load (`Demo vehicle cannot be dispatched on production load`). Demo trucks are only eligible for matching against demo loads.
+4. **Synthetic Telemetry Containment**: Simulated GPS coordinates are tagged with `source = "SYNTHETIC_SIMULATED_GPS"` and `shipment_id = None`, preventing pollution of live carrier tracking feeds.
+5. **UI Transparency**: Every demo record displays a high-visibility `DEMO DATA · Unverified` badge, `[DEMO]` label, and synthetic reliability rating annotation across Dealer, Driver, Workspace, and Fleet views.
+
+---
+
+## 9. Backup & Recovery Operations
 
 Create an atomic online SQLite hot backup:
 
@@ -234,7 +281,7 @@ python scripts/backup_restore.py restore backups/loadlink_backup_<timestamp>.db
 
 ---
 
-## 9. Known Limitations & Production Roadmap
+## 10. Known Limitations & Production Roadmap
 
 - **Database Write Concurrency**: SQLite with Write-Ahead Logging (`WAL`) provides stable throughput up to ~100 concurrent users (0.0% error rate). For mass-scale production exceeding 500 simultaneous writing clients, migration to PostgreSQL 16 + PostGIS is recommended.
 - **Android Sideloading Advisory**: APKs sideloaded outside the Google Play Store display a standard *"Unrecognized App"* dialog until published through Google Play Console under an enrolled developer account.

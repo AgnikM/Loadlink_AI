@@ -207,6 +207,22 @@ export default function DriverView({
 
   return (
     <div className="max-w-xl mx-auto space-y-5 pb-12">
+      {/* Synthetic Fleet Demo Warning Banner */}
+      {currentTruck?.is_demo && (
+        <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-3 text-xs text-[#1E40AF] flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
+            <div>
+              <span className="font-bold">Synthetic Fleet Vehicle (Demo Mode):</span>{" "}
+              Simulated telemetry and unverified profile. Excluded from production dispatches.
+            </div>
+          </div>
+          <span className="text-[10px] uppercase font-mono font-bold bg-[#DBEAFE] px-2 py-0.5 rounded">
+            DEMO DATA
+          </span>
+        </div>
+      )}
+
       {/* Mobile Carrier Header Card */}
       <div className="bg-[#FFFFFF] border border-[#E6DED5] rounded-2xl p-5 shadow-xs relative overflow-hidden">
         <div className="flex items-center justify-between">
@@ -215,12 +231,17 @@ export default function DriverView({
               <Truck className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-bold text-[#29231F]">
                   {currentTruck ? currentTruck.registration_no : "WB-19-AF-0184"}
                 </h2>
+                {currentTruck?.is_demo && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
+                    DEMO FLEET
+                  </span>
+                )}
                 <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#EBF5EE] text-[#3F7D58] border border-[#C6E6D0]">
-                  {currentTruck?.driver_reliability_score || 96}% Trust Index
+                  {currentTruck?.driver_reliability_score || 96}% {currentTruck?.is_demo ? "Synthetic Score" : "Trust Index"}
                 </span>
               </div>
               <p className="text-xs text-[#6E6259] mt-0.5">

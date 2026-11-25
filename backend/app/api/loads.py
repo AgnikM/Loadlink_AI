@@ -49,6 +49,7 @@ def _build_load_out(load: Load, dealer_name: Optional[str] = None, matches_count
         estimated_benchmark_price=load.estimated_benchmark_price,
         cargo_notes=load.cargo_notes,
         status=load.status,
+        is_demo=bool(getattr(load, "is_demo", False)),
         created_at=load.created_at,
         matches_count=matches_count,
     )
@@ -184,7 +185,7 @@ async def create_load(
 async def list_loads(
     status_filter: Optional[LoadStatus] = None,
     only_my_loads: bool = Query(False),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(200, ge=1, le=500),
     offset: int = Query(0, ge=0),
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),

@@ -77,6 +77,7 @@ export interface Truck {
   current_lon?: number;
   current_location_name?: string;
   last_location_time?: string;
+  is_demo?: boolean;
 }
 
 export type TruckOut = Truck;
@@ -180,6 +181,7 @@ export interface Load {
   estimated_benchmark_price?: number;
   cargo_notes?: string;
   status: LoadStatus;
+  is_demo?: boolean;
   created_at: string;
   matches_count?: number;
 }
@@ -215,6 +217,7 @@ export interface Match {
   truck_current_lat?: number;
   truck_current_lon?: number;
   truck_location_name?: string;
+  is_demo?: boolean;
 }
 
 export interface Booking {

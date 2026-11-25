@@ -178,9 +178,16 @@ export default function DealerView({ loads, shipments, onRefresh }: DealerViewPr
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#29231F] truncate max-w-[200px]">
-                          {l.cargo_type} ({l.cargo_weight_tons}T)
-                        </span>
+                        <div className="flex items-center gap-1.5 truncate max-w-[200px]">
+                          <span className="text-xs font-bold text-[#29231F] truncate">
+                            {l.cargo_type} ({l.cargo_weight_tons}T)
+                          </span>
+                          {(l.is_demo || l.id.startsWith("DEMO-")) && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] shrink-0">
+                              DEMO DATA
+                            </span>
+                          )}
+                        </div>
                         <span
                           className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
                             l.status === "COMPLETED"
@@ -315,12 +322,20 @@ export default function DealerView({ loads, shipments, onRefresh }: DealerViewPr
                       </div>
                     </div>
 
-                    {/* Predictive Tag if applicable */}
-                    {m.is_coming_near_you && (
-                      <div className="mt-1.5 px-2 py-0.5 rounded bg-[#FEF6E7] border border-[#FCDCA0] text-[10px] text-[#B7791F] font-semibold inline-block">
-                        Predictive: In-Transit Truck Approaching Pickup Hub
-                      </div>
-                    )}
+                    {/* Badges / Predictive Tags */}
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {m.is_demo && (
+                        <div className="px-2 py-0.5 rounded bg-[#EFF6FF] border border-[#BFDBFE] text-[10px] text-[#1E40AF] font-bold inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                          <span>DEMO DATA · Unverified</span>
+                        </div>
+                      )}
+                      {m.is_coming_near_you && (
+                        <div className="px-2 py-0.5 rounded bg-[#FEF6E7] border border-[#FCDCA0] text-[10px] text-[#B7791F] font-semibold inline-block">
+                          Predictive: In-Transit Truck Approaching Pickup Hub
+                        </div>
+                      )}
+                    </div>
 
                     {/* Algorithm Rationale Summary */}
                     <p className="text-[11px] text-[#6E6259] mt-2 line-clamp-2 leading-relaxed bg-[#F7F5F0] p-2 rounded-lg border border-[#E6DED5]">
@@ -329,7 +344,7 @@ export default function DealerView({ loads, shipments, onRefresh }: DealerViewPr
 
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#E6DED5] text-[11px]">
                       <span className="text-[#6E6259]">
-                        Reliability: <strong className="text-[#3F7D58]">{m.driver_reliability_score}%</strong>
+                        Reliability: <strong className="text-[#3F7D58]">{m.driver_reliability_score}%{m.is_demo ? " (Synthetic Demo)" : ""}</strong>
                       </span>
                       <button
                         onClick={() => {

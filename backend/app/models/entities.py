@@ -37,6 +37,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     role = Column(SQLEnum(UserRole), nullable=False)
     verification_status = Column(SQLEnum(VerificationStatus), default=VerificationStatus.PENDING)
+    is_demo = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=utcnow)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
@@ -57,6 +58,7 @@ class Organization(Base):
     gstin = Column(String(50), nullable=True)
     operating_corridor = Column(String(255), default="Kolkata ↔ Durgapur ↔ Asansol")
     verification_status = Column(SQLEnum(VerificationStatus), default=VerificationStatus.VERIFIED)
+    is_demo = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=utcnow)
 
     dealers = relationship("Dealer", back_populates="organization")
@@ -72,6 +74,7 @@ class Transporter(Base):
     organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     fleet_size = Column(Integer, default=0)
     trust_score = Column(Float, default=95.0)
+    is_demo = Column(Boolean, default=False, index=True)
 
     user = relationship("User", back_populates="transporter_profile")
     organization = relationship("Organization", back_populates="transporters")
@@ -86,6 +89,7 @@ class Dealer(Base):
     total_loads_posted = Column(Integer, default=0)
     total_completed_loads = Column(Integer, default=0)
     cancellations_count = Column(Integer, default=0)
+    is_demo = Column(Boolean, default=False, index=True)
 
     user = relationship("User", back_populates="dealer_profile")
     organization = relationship("Organization", back_populates="dealers")
@@ -108,6 +112,7 @@ class Driver(Base):
     cancellations_count = Column(Integer, default=0)
     emergency_contact_name = Column(String(255), default="Paramjeet Yadav (Brother)")
     emergency_contact_phone = Column(String(50), default="+919830099881")
+    is_demo = Column(Boolean, default=False, index=True)
 
     user = relationship("User", back_populates="driver_profile")
     organization = relationship("Organization", back_populates="drivers")
@@ -129,8 +134,11 @@ class Truck(Base):
     registration_no = Column(String(50), unique=True, index=True, nullable=False)
     truck_type = Column(SQLEnum(TruckType), default=TruckType.OPEN_BODY)
     capacity_tons = Column(Float, nullable=False)
+    legal_payload_tons = Column(Float, nullable=True)
+    quoted_freight_inr = Column(Float, nullable=True)
     status = Column(SQLEnum(TruckStatus), default=TruckStatus.ONLINE_AVAILABLE)
     verification_status = Column(SQLEnum(VerificationStatus), default=VerificationStatus.VERIFIED)
+    is_demo = Column(Boolean, default=False, index=True)
     
     current_lat = Column(Float, nullable=True)
     current_lon = Column(Float, nullable=True)
@@ -199,6 +207,7 @@ class Load(Base):
     cargo_notes = Column(Text, nullable=True)
     
     status = Column(SQLEnum(LoadStatus), default=LoadStatus.POSTED)
+    is_demo = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=utcnow)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
@@ -248,6 +257,7 @@ class Booking(Base):
     offered_price = Column(Float, nullable=False)
     status = Column(SQLEnum(BookingStatus), default=BookingStatus.PENDING)
     rejection_reason = Column(String(255), nullable=True)
+    is_demo = Column(Boolean, default=False, index=True)
     
     requested_at = Column(DateTime, default=utcnow)
     responded_at = Column(DateTime, nullable=True)
@@ -361,6 +371,7 @@ class Shipment(Base):
     
     distance_km = Column(Float, default=0.0)
     agreed_freight = Column(Float, nullable=False)
+    is_demo = Column(Boolean, default=False, index=True)
     
     created_at = Column(DateTime, default=utcnow)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
@@ -396,6 +407,7 @@ class TruckLocation(Base):
     source = Column(String(50), default="GPS")
     sequence_number = Column(Integer, default=0)
     is_suspicious_jump = Column(Boolean, default=False)
+    is_demo = Column(Boolean, default=False, index=True)
     
     recorded_at = Column(DateTime, default=utcnow)
 

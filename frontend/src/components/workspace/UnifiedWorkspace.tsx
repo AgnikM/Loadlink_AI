@@ -67,6 +67,7 @@ type TruckData = {
   status?: string;
   ownership_type?: string;
   organization_name?: string;
+  is_demo?: boolean;
 };
 
 type LoadData = {
@@ -86,6 +87,7 @@ type LoadData = {
   origin_name?: string;
   destination_name?: string;
   cargo_weight_tons?: number;
+  is_demo?: boolean;
 };
 
 type Match = {
@@ -100,6 +102,7 @@ type Match = {
   neural_network_score?: number;
   rules_score?: number;
   ranking_method?: string;
+  is_demo?: boolean;
 };
 
 type Booking = {
@@ -1054,7 +1057,7 @@ export default function UnifiedWorkspace() {
                     <option value="">Select a consignment</option>
                     {loads.map((l) => (
                       <option key={l.id} value={l.id}>
-                        {l.origin} → {l.destination} ({l.required_tonnes}T)
+                        {l.is_demo || l.id.startsWith("DEMO-") ? "[DEMO] " : ""}{l.origin} → {l.destination} ({l.required_tonnes}T)
                       </option>
                     ))}
                   </select>
@@ -1105,9 +1108,15 @@ export default function UnifiedWorkspace() {
                                   <b className="text-sm text-[#29231F] font-mono">
                                     {t?.registration_no || m.truck_id}
                                   </b>
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EBF7EE] text-[#24613B] border border-[#BDE5C8]">
-                                    ✓ Verified
-                                  </span>
+                                  {t?.is_demo || m.is_demo || m.truck_id.startsWith("DEMO-") ? (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                                      DEMO DATA · Unverified
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EBF7EE] text-[#24613B] border border-[#BDE5C8]">
+                                      ✓ Verified
+                                    </span>
+                                  )}
                                 </div>
                                 <p className="text-xs text-[#6E6259] mt-0.5">
                                   {t?.driver_name || "Commercial Carrier"} · {t?.vehicle_type || "Open"} ·{" "}
@@ -1116,7 +1125,10 @@ export default function UnifiedWorkspace() {
                                 <p className="text-[11px] text-[#8A796B] mt-1 flex items-center gap-2">
                                   <span>{m.distance_km} km to pickup</span>
                                   <span>•</span>
-                                  <span>Reliability: {t?.reliability_score || 90}/100</span>
+                                  <span>
+                                    Reliability: {t?.reliability_score || 90}/100{" "}
+                                    {t?.is_demo || m.is_demo || m.truck_id.startsWith("DEMO-") ? "(Synthetic Demo)" : ""}
+                                  </span>
                                 </p>
                               </div>
                             </div>
@@ -1427,8 +1439,15 @@ export default function UnifiedWorkspace() {
                             <Truck size={16} />
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-[#29231F] font-mono">
-                              {t.registration_no || t.id}
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-bold text-[#29231F] font-mono">
+                                {t.registration_no || t.id}
+                              </span>
+                              {(t.is_demo || t.id.startsWith("DEMO-") || t.registration_no?.startsWith("TEST-")) && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                                  DEMO DATA
+                                </span>
+                              )}
                             </div>
                             <div className="text-[10px] text-[#6E6259]">
                               {t.driver_name} · {t.vehicle_type} · {t.capacity_tonnes}T
@@ -1703,38 +1722,52 @@ export default function UnifiedWorkspace() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E6DED5]">
-                      {trucks.map((t) => (
-                        <tr key={t.id} className="hover:bg-[#FDFCFB]">
-                          <td className="p-3 font-mono font-bold text-[#29231F]">
-                            {t.registration_no || t.id}
-                          </td>
-                          <td className="p-3 font-semibold text-[#29231F]">{t.driver_name}</td>
-                          <td className="p-3 text-[#6E6259]">{t.vehicle_type}</td>
-                          <td className="p-3 font-mono text-[#29231F]">{t.capacity_tonnes}T</td>
-                          <td className="p-3">
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                                t.verified
-                                  ? "bg-[#EBF7EE] text-[#24613B] border-[#BDE5C8]"
-                                  : "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
-                              }`}
-                            >
-                              {t.verified ? "Verified" : "Pending"}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                                t.documents_valid
-                                  ? "bg-[#EBF7EE] text-[#24613B] border-[#BDE5C8]"
-                                  : "bg-[#FAEDED] text-[#C53030] border-[#F1C4C4]"
-                              }`}
-                            >
-                              {t.documents_valid ? "Valid" : "Review Required"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {trucks.map((t) => {
+                        const isDemo = t.is_demo || t.id.startsWith("DEMO-") || t.registration_no?.startsWith("TEST-");
+                        return (
+                          <tr key={t.id} className="hover:bg-[#FDFCFB]">
+                            <td className="p-3 font-mono font-bold text-[#29231F]">
+                              <div className="flex items-center gap-1.5">
+                                <span>{t.registration_no || t.id}</span>
+                                {isDemo && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                                    DEMO DATA
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 font-semibold text-[#29231F]">{t.driver_name}</td>
+                            <td className="p-3 text-[#6E6259]">{t.vehicle_type}</td>
+                            <td className="p-3 font-mono text-[#29231F]">{t.capacity_tonnes}T</td>
+                            <td className="p-3">
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                                  isDemo
+                                    ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
+                                    : t.verified
+                                    ? "bg-[#EBF7EE] text-[#24613B] border-[#BDE5C8]"
+                                    : "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
+                                }`}
+                              >
+                                {isDemo ? "Unverified Demo" : t.verified ? "Verified" : "Pending"}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                                  isDemo
+                                    ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]"
+                                    : t.documents_valid
+                                    ? "bg-[#EBF7EE] text-[#24613B] border-[#BDE5C8]"
+                                    : "bg-[#FAEDED] text-[#C53030] border-[#F1C4C4]"
+                                }`}
+                              >
+                                {isDemo ? "Demo Spec Only" : t.documents_valid ? "Valid" : "Review Required"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1783,8 +1816,15 @@ export default function UnifiedWorkspace() {
                           >
                             {t.ownership_type === "LOADLINK_OWNED" ? "LoadLink Owned" : "External Carrier"}
                           </span>
-                          <div className="text-base font-black font-mono text-[#29231F] mt-1">
-                            {t.registration_no || t.id}
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-base font-black font-mono text-[#29231F]">
+                              {t.registration_no || t.id}
+                            </span>
+                            {(t.is_demo || t.id.startsWith("DEMO-") || t.registration_no?.startsWith("TEST-")) && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                                DEMO DATA
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-[#6E6259]">
                             {t.organization_name || "Commercial Carrier Organization"}

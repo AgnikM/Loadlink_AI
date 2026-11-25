@@ -65,7 +65,9 @@ export default function DriverPWAPage() {
     initDriverAuth();
   }, [initDriverAuth]);
 
-  const currentTruck = trucks.find(
+  const [selectedTruckId, setSelectedTruckId] = useState<string>("");
+
+  const currentTruck = (selectedTruckId ? trucks.find(t => t.id === selectedTruckId) : null) || trucks.find(
     (t) => currentUser?.driver_id && t.driver_id === currentUser.driver_id
   ) || trucks[0];
 
@@ -83,6 +85,26 @@ export default function DriverPWAPage() {
       />
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 lg:p-6">
+        {trucks.length > 1 && (
+          <div className="mb-4 bg-[#FFFFFF] border border-[#E6DED5] rounded-xl p-3 flex items-center justify-between gap-3 shadow-xs">
+            <label htmlFor="truck-switcher" className="text-xs font-semibold text-[#5A3E2B] whitespace-nowrap">
+              Active Vehicle:
+            </label>
+            <select
+              id="truck-switcher"
+              value={currentTruck?.id || ""}
+              onChange={(e) => setSelectedTruckId(e.target.value)}
+              className="text-xs bg-[#F7F5F0] border border-[#E6DED5] rounded-lg px-2.5 py-1.5 text-[#29231F] font-mono focus:outline-none focus:ring-1 focus:ring-[#5A3E2B] flex-1 max-w-sm truncate"
+            >
+              {trucks.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.is_demo ? "[DEMO] " : ""}{t.registration_no} ({t.capacity_tons}T {t.truck_type}) - {t.driver_name || "Unassigned"}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <DriverView
           currentTruck={currentTruck}
           bookings={bookings}

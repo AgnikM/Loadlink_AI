@@ -46,7 +46,6 @@ async def generate_matches_for_load(
         select(Truck)
         .where(
             Truck.status.in_([TruckStatus.ONLINE_AVAILABLE, TruckStatus.IN_TRANSIT]),
-            Truck.verification_status == VerificationStatus.VERIFIED,
             Truck.capacity_tons >= load.cargo_weight_tons,
             Truck.capacity_tons <= load.max_capacity_tons,
         )
@@ -54,6 +53,11 @@ async def generate_matches_for_load(
             selectinload(Truck.driver).selectinload(Driver.user),
         )
     )
+    if not getattr(load, "is_demo", False):
+        q_trucks = q_trucks.where(
+            Truck.verification_status == VerificationStatus.VERIFIED,
+            Truck.is_demo == False,
+        )
     if load.required_truck_type:
         q_trucks = q_trucks.where(Truck.truck_type == load.required_truck_type)
 
@@ -127,6 +131,7 @@ async def generate_matches_for_load(
                 truck_current_lat=truck.current_lat,
                 truck_current_lon=truck.current_lon,
                 truck_location_name=truck.current_location_name,
+                is_demo=bool(getattr(truck, "is_demo", False)),
             )
         )
     return output
@@ -189,6 +194,7 @@ async def get_matches_for_load(
                 truck_current_lat=truck.current_lat if truck else None,
                 truck_current_lon=truck.current_lon if truck else None,
                 truck_location_name=truck.current_location_name if truck else None,
+                is_demo=bool(getattr(truck, "is_demo", False)) if truck else False,
             )
         )
     return output
@@ -335,6 +341,7 @@ async def ai_matching_for_load(
                     ai_score=round(score, 1),
                     neural_network_score=round(score * 0.98, 1),
                     ranking_method="Deterministic 7-Factor Corridor Optimization Engine",
+                    is_demo=bool(getattr(truck, "is_demo", False)),
                 )
             )
         else:
@@ -351,6 +358,7 @@ async def ai_matching_for_load(
                     ai_score=0.0,
                     neural_network_score=0.0,
                     ranking_method="Deterministic 7-Factor Corridor Optimization Engine",
+                    is_demo=bool(getattr(truck, "is_demo", False)),
                 )
             )
 
