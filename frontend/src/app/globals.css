@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  :root {
+    --background: #F7F5F0;
+    --foreground: #29231F;
+    --card: #FFFFFF;
+    --card-foreground: #29231F;
+    --popover: #FFFFFF;
+    --popover-foreground: #29231F;
+    --primary: #5A3E2B;
+    --primary-foreground: #FFFFFF;
+    --secondary: #8A796B;
+    --secondary-foreground: #FFFFFF;
+    --muted: #EFECE6;
+    --muted-foreground: #6E6259;
+    --accent: #EFECE6;
+    --accent-foreground: #29231F;
+    --border: #E6DED5;
+    --input: #E6DED5;
+    --ring: #5A3E2B;
+    --success: #3F7D58;
+    --warning: #B7791F;
+  }
+}
+
+body {
+  background-color: #F7F5F0;
+  color: #29231F;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Enterprise Warm Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F5F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8CEC4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B3A497;
+}
+
+/* Leaflet map styles with enterprise warm palette */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  background: #EFECE6 !important;
+  font-family: inherit;
+  border-radius: 0.75rem;
+  overflow: hidden !important;
+  position: relative;
+  isolation: isolate;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #FFFFFF !important;
+  color: #29231F !important;
+  border: 1px solid #E6DED5 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(41, 35, 31, 0.12) !important;
+}
+.leaflet-popup-tip {
+  background: #FFFFFF !important;
+}
+
+/* Warm enterprise cards & panels */
+.enterprise-card {
+  background: #FFFFFF;
+  border: 1px solid #E6DED5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.enterprise-card-interactive {
+  background: #FFFFFF;
+  border: 1px solid #E6DED5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease-in-out;
+}
+.enterprise-card-interactive:hover {
+  border-color: #C8BDB0;
+  box-shadow: 0 4px 12px rgba(90, 62, 43, 0.08);
+}
+
+/* Subtle operational pulse for live tracking indicator */
+@keyframes soft-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(63, 125, 88, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(63, 125, 88, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 125, 88, 0);
+  }
+}
+
+.live-pulse {
+  animation: soft-pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}

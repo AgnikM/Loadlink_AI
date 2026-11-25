@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LoadLink Driver</string>
+    <string name="title_activity_main">LoadLink Driver Portal</string>
+    <string name="tracking_channel_name">Location Tracking Service</string>
+    <string name="tracking_channel_description">Maintains driver telematics and highway corridor safety</string>
+    <string name="sos_channel_name">SOS Emergency Alerts</string>
+</resources>
